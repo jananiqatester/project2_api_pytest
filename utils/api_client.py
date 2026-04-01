@@ -17,11 +17,10 @@ def delete(endpoint):
     return requests.delete(build_url(endpoint))
 
 def login(username, password):
-    response = requests.post(
+    return requests.post(
         build_url("/auth/login"),
         json={
             "username": username,
             "password": password
         }
     )
-    return response

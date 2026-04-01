@@ -1,3 +1,13 @@
+"""
+This test suite validates product APIs including:
+- Retrieval (GET)
+- Creation (POST)
+- Update (PUT)
+- Deletion (DELETE)
+
+Includes both positive and negative scenarios using parametrization.
+"""
+
 import pytest
 from utils.api_client import get, post
 from utils.validators import (
@@ -13,11 +23,12 @@ from utils.validators import (
 def test_get_products_success():
     response = get("/products")
 
-    # Validate status code
+    if response.status_code == 523:
+        pytest.skip("External API unavailable (523)")
+
     assert response.status_code == 200
     validate_status_code(response, 200)
 
-    # Validate response is JSON and not empty
     data = validate_json_response(response)
     validate_list_not_empty(data)
 
@@ -31,17 +42,17 @@ def test_get_product_by_id(product_id):
 
     response = get(f"/products/{product_id}")
 
-    # Validate status code (200 for valid, 404 for invalid)
+    if response.status_code == 523:
+        pytest.skip("External API unavailable (523)")
+
     assert response.status_code in [200, 404]
 
     data = validate_json_response(response)
 
-    # Positive case: valid product
     if response.status_code == 200:
         assert data["id"] == product_id
         validate_product_structure(data)
 
-    # Negative case: invalid product
     elif response.status_code == 404:
         assert data == {}
 
@@ -60,11 +71,44 @@ def test_create_product():
 
     response = post("/products", payload)
 
-    # Validate creation status
+    if response.status_code == 523:
+        pytest.skip("External API unavailable (523)")
+
     assert response.status_code in [200, 201]
 
     data = validate_json_response(response)
 
-    # Validate response contains expected fields
     assert "id" in data
     assert data["title"] == payload["title"]
+
+
+# =========================================================
+# TC_005 - Verify PUT /products/{id} updates product
+# =========================================================
+def test_update_product():
+    from utils.api_client import put
+
+    payload = {
+        "title": "Updated Product"
+    }
+
+    response = put("/products/1", payload)
+
+    if response.status_code == 523:
+        pytest.skip("External API unavailable (523)")
+
+    assert response.status_code == 200
+
+
+# =========================================================
+# TC_006 - Verify DELETE /products/{id} deletes product
+# =========================================================
+def test_delete_product():
+    from utils.api_client import delete
+
+    response = delete("/products/1")
+
+    if response.status_code == 523:
+        pytest.skip("External API unavailable (523)")
+
+    assert response.status_code == 200
