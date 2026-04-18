@@ -5,7 +5,7 @@ import pytest
 # TC_001 - Verify login returns token for valid credentials
 # =========================================================
 def test_login_success():
-    response = login("mor_2314", "83r5^_")
+    response = login(TEST_USERNAME, TEST_PASSWORD)
 
     # Handle external API downtime
     if response.status_code == 523:

@@ -9,7 +9,7 @@ Includes both positive and negative scenarios using parametrization.
 """
 
 import pytest
-from utils.api_client import get, post
+from utils.api_client import get, post, put, delete
 from utils.validators import (
     validate_status_code,
     validate_json_response,
@@ -26,7 +26,6 @@ def test_get_products_success():
     if response.status_code == 523:
         pytest.skip("External API unavailable (523)")
 
-    assert response.status_code == 200
     validate_status_code(response, 200)
 
     data = validate_json_response(response)
@@ -86,7 +85,6 @@ def test_create_product():
 # TC_005 - Verify PUT /products/{id} updates product
 # =========================================================
 def test_update_product():
-    from utils.api_client import put
 
     payload = {
         "title": "Updated Product"
@@ -98,13 +96,14 @@ def test_update_product():
         pytest.skip("External API unavailable (523)")
 
     assert response.status_code == 200
+    data = response.json()
+    assert data["title"] == "Updated Product"
 
 
 # =========================================================
 # TC_006 - Verify DELETE /products/{id} deletes product
 # =========================================================
 def test_delete_product():
-    from utils.api_client import delete
 
     response = delete("/products/1")
 
@@ -112,3 +111,13 @@ def test_delete_product():
         pytest.skip("External API unavailable (523)")
 
     assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == 1
+
+def test_login_failure():
+    response = login("wronguser", "wrongpassword")
+
+    if response.status_code == 523:
+        pytest.skip("External API unavailable (523)")
+
+    assert response.status_code in [400, 401]
